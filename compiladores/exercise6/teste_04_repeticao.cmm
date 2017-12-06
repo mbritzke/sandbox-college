@@ -1,0 +1,22 @@
+int num;
+int cont;
+int result;
+
+void main() {
+   while (true) {
+    		write("Informe um numero: ");
+    		read( num );
+ 
+    		cont = 1;
+    		result = 0;
+
+    		while ( num+1 > cont ) {
+        	  result = result + cont;
+        	  cont = cont + 1;
+       	}
+
+    		write("Valor do somatorio(1..num): ", result);
+    		
+    }
+ }
+

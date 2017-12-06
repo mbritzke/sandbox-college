@@ -1,0 +1,7 @@
+int c;
+funct int soma(){
+  int b;
+  while(c == b){
+    c = 23;
+  }
+}

@@ -1,0 +1,12 @@
+int cont;
+
+void main() {
+    cont = 0;
+    for( ; ; ){
+        cont = cont + 1;
+        if(cont < 3) continue;
+        if(cont > 7) break;
+        write("cont: ", cont);
+    }
+}
+

@@ -1,0 +1,33 @@
+int num;
+int cont;
+int result;
+int atual;
+int fim;
+
+void main() { 
+   while (true) {
+        write(" - - - - - - - - ");
+    		write("Informe um numero: ");
+    		read( num );
+        
+        fim = num;
+    		atual = 1;
+    		
+        while (fim+1 > atual) {
+    				num = atual;
+    				cont = 1;
+    				result = 0;
+        
+    				while ( num+1 > cont ) {
+        	  	result = result + cont;
+        	  	cont = cont + 1;
+       			}
+
+    				write("Valor do somatorio de 1 a ", num);
+    				write("    --> resultado: ", result);
+    				
+    				atual = atual + 1;
+        }
+    }    
+ } 
+

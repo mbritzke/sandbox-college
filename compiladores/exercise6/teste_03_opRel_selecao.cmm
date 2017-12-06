@@ -1,0 +1,51 @@
+int a; 
+int b; 
+int c;
+int maior;
+bool ok;
+bool p1;
+bool p2;
+
+
+void main() {  
+    write("Informe 3 numeros: ");
+    read( a );
+    read( b );
+    read( c );
+
+    write (" a =  ", a );
+    write (" b =  ", b );
+    write (" c =  ", c );
+    
+    p1 = a > b;
+    p2 = a > c;
+    
+    ok = p1 && p2;
+
+    write (" p1 =  ", p1 );
+    write (" p2 =  ", p2 );
+    write (" ok =  ", ok );
+    
+    if (ok)
+       write (" ok =  ", ok );
+    else
+       write (" nao ok =  ", ok );
+       
+    if ( a > 0 )
+        write("a eh um numero positivo");
+    else
+       write("a NAO eh um numero positivo");
+
+  
+
+    if ( ok ) 
+       maior = a;
+    else if ( b > c )
+            maior = b;
+         else 
+            maior = c;
+
+
+    write ("maior dos tres valores: ", maior);
+}
+

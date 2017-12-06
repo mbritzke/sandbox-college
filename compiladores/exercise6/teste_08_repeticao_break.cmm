@@ -1,0 +1,13 @@
+int num;
+
+void main() {
+   while (true) {
+    		write("Informe um numero: ");
+    		read( num );
+			break;
+			write("Não deveria aparecer;");
+       	}
+		write("Valor informado: ", num);
+}
+ 
+

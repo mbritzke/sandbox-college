@@ -1,0 +1,14 @@
+int a; 
+int b; 
+
+void main() {  
+    write("Informe 2 numeros (um por linha): ");
+    read( a );
+    read( b );
+
+   
+    write (" a =  ", a );
+    write (" b =  ", b );
+
+}
+

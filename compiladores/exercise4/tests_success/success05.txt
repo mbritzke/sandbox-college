@@ -1,0 +1,9 @@
+int c;
+boolean teste;
+funct int soma(int a){
+  int b;
+  b = a + 1;
+  while ((b > 2) && (teste)){
+    c = 2;
+  }
+}

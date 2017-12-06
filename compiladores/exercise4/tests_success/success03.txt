@@ -1,0 +1,9 @@
+int c;
+int teste;
+funct int soma(int a){
+  int b;
+  b = a + 1;
+  if (b > 2){
+    c = 2;
+  }
+}

@@ -1,0 +1,10 @@
+int cont;
+
+void main() {
+    cont = 0;
+    for(; cont < 10;){
+        write("cont: ", cont);
+        cont = cont + 1;
+    }
+}
+

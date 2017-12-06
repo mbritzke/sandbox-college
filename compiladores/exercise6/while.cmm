@@ -1,0 +1,15 @@
+int a;
+
+
+void main() {
+   a=1;
+   while (a<=5) {
+        
+        while (true)
+           a=a+1;
+        
+       	}
+	
+    
+ }
+

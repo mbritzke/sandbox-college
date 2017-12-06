@@ -1,0 +1,18 @@
+int num;
+
+void main() {
+   while (true) {
+    		write("Informe um numero: ");
+    		read( num );
+			if(num == 0){
+				break;
+				write("Não deveria aparecer;");
+			}
+			if(num > 1){
+				continue;
+			}
+       	}
+		write("Valor informado: ", num);
+}
+ 
+

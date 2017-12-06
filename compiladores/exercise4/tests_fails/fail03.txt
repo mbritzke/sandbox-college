@@ -1,0 +1,5 @@
+int c;
+funct int soma(){
+  int b;
+  b = a + 1;
+}

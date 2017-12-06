@@ -1,0 +1,7 @@
+int c;
+funct int soma(){
+  int b;
+  if(true == c){
+    c = 23;
+  }
+}
