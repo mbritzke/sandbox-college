@@ -67,18 +67,6 @@ bool strmatch(string str, string pattern, int n, int m)
     return lookup[n][m]; 
 }
 
-void openPatternFile(string fileName)
-{
-    cout << fixed << setprecision(1);
-    patternFile.open(fileName);
-}
-
-void openTextFile(string fileName)
-{
-    cout << fixed << setprecision(1);
-    textFile.open(fileName);
-}
-
 void closeFiles()
 {
     patternFile.close();
