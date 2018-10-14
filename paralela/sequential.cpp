@@ -2,13 +2,19 @@
 
 // C++ program to implement wildcard 
 // pattern matching algorithm 
-#include <bits/stdc++.h> 
-using namespace std; 
-  
+#include <bits/stdc++.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+ofstream patternFile;
+ofstream textFile;
+
 // Function that matches input str with 
 // given wildcard pattern 
-bool strmatch(char str[], char pattern[], 
-              int n, int m) 
+bool strmatch(string str, string pattern, int n, int m) 
 { 
     // empty pattern can only match with 
     // empty string 
@@ -59,32 +65,52 @@ bool strmatch(char str[], char pattern[],
     } 
   
     return lookup[n][m]; 
-} 
+}
+
+void openPatternFile(string fileName)
+{
+    cout << fixed << setprecision(1);
+    patternFile.open(fileName);
+}
+
+void openTextFile(string fileName)
+{
+    cout << fixed << setprecision(1);
+    textFile.open(fileName);
+}
+
+void closeFiles()
+{
+    patternFile.close();
+    textFile.close();
+}
   
 int main() 
 { 
-    char str[] = "baaabab"; 
-    char pattern[] = "*****ba*****ab"; 
-    // char pattern[] = "ba*****ab"; 
-    // char pattern[] = "ba*ab"; 
-    // char pattern[] = "a*ab"; 
-    // char pattern[] = "a*****ab"; 
-    // char pattern[] = "*a*****ab"; 
-    // char pattern[] = "ba*ab****"; 
-    // char pattern[] = "****"; 
-    // char pattern[] = "*"; 
-    // char pattern[] = "aa?ab"; 
-    // char pattern[] = "b*b"; 
-    // char pattern[] = "a*a"; 
-    // char pattern[] = "baaabab"; 
-    // char pattern[] = "?baaabab"; 
-    // char pattern[] = "*baaaba*"; 
-  
-    if (strmatch(str, pattern, strlen(str), 
-                         strlen(pattern))) 
-        cout <<    "Yes" << endl; 
+    std::string str;
+    std::ifstream patternFile("pattern.txt");
+    std::string patternFile_contents;
+    while (std::getline(patternFile, str))
+    {
+        patternFile_contents += str;
+        patternFile_contents.push_back('\n');
+    }
+
+    std::ifstream textFile("text.txt");
+    std::string textFile_contents;
+    while (std::getline(textFile, str))
+    {
+        textFile_contents += str;
+        textFile_contents.push_back('\n');
+    }  
+    
+    if (strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size())) 
+        cout << "Yes" << endl; 
     else
         cout << "No" << endl; 
-  
-    return 0; 
+
+    closeFiles();
+
+    return 0;
+    
 } 
