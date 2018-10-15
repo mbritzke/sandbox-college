@@ -84,10 +84,7 @@ void closeFiles()
 int main() 
 { 
     string patternFile_contents = getAllLines("pattern.txt");
-    cout << patternFile_contents << endl;
-
-    string textFile_contents = getAllLines("text.txt");
-    cout << textFile_contents << endl; 
+    string textFile_contents = getAllLines("text.txt");    
     
     /*
     if (strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size())) 
