@@ -12,17 +12,15 @@ using namespace std;
 ofstream patternFile;
 ofstream textFile;
 
-// Function that matches input str with 
-// given wildcard pattern 
-bool strmatch(string str, string pattern, int n, int m) 
-{ 
-    // empty pattern can only match with 
-    // empty string 
+// Function that matches input str with given wildcard pattern 
+int strmatch(string str, string pattern, int n, int m) 
+{
+    int matchCounter = 0; 
+    // empty pattern can only match with empty string 
     if (m == 0) 
         return (n == 0); 
   
-    // lookup table for storing results of 
-    // subproblems 
+    // lookup table for storing results of subproblems 
     bool lookup[n + 1][m + 1]; 
   
     // initailze lookup table to false 
@@ -42,29 +40,26 @@ bool strmatch(string str, string pattern, int n, int m)
         for (int j = 1; j <= m; j++) 
         { 
             // Two cases if we see a '*' 
-            // a) We ignore ‘*’ character and move 
-            //    to next  character in the pattern, 
+            // a) We ignore ‘*’ character and move to next  character in the pattern, 
             //     i.e., ‘*’ indicates an empty sequence. 
-            // b) '*' character matches with ith 
-            //     character in input 
-            if (pattern[j - 1] == '*') 
-                lookup[i][j] = lookup[i][j - 1] || 
-                               lookup[i - 1][j]; 
+            // b) '*' character matches with ith character in input 
+            if (pattern[j - 1] == '*'){ 
+                lookup[i][j] = lookup[i][j - 1] || lookup[i - 1][j];
+                matchCounter++;  
+            } 
   
-            // Current characters are considered as 
-            // matching in two cases 
+            // Current characters are considered as matching in two cases 
             // (a) current character of pattern is '?' 
             // (b) characters actually match 
-            else if (pattern[j - 1] == '?' || 
-                    str[i - 1] == pattern[j - 1]) 
+            else if (pattern[j - 1] == '?' || str[i - 1] == pattern[j - 1]) 
                 lookup[i][j] = lookup[i - 1][j - 1]; 
   
             // If characters don't match 
             else lookup[i][j] = false; 
         } 
     } 
-  
-    return lookup[n][m]; 
+    return matchCounter;
+    //return lookup[n][m]; 
 }
 
 void closeFiles()
@@ -92,11 +87,17 @@ int main()
         textFile_contents.push_back('\n');
     }  
     
+    /*
     if (strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size())) 
         cout << "Yes" << endl; 
     else
         cout << "No" << endl; 
+    */
+    int counter = 0;
+    counter = strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size());
 
+    std::cout << "Number of matches: " << counter << endl; 
+    
     closeFiles();
 
     return 0;
