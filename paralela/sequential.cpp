@@ -62,6 +62,19 @@ int strmatch(string str, string pattern, int n, int m)
     //return lookup[n][m]; 
 }
 
+string getAllLines(string nameOfFile){
+    string str;
+    ifstream myFile(nameOfFile);
+    string linesOfFile;
+    while (std::getline(myFile, str))
+    {
+        linesOfFile += str;
+        linesOfFile.push_back('\n');
+    }
+    myFile.close();
+    return str;
+}
+
 void closeFiles()
 {
     patternFile.close();
@@ -70,22 +83,11 @@ void closeFiles()
   
 int main() 
 { 
-    std::string str;
-    std::ifstream patternFile("pattern.txt");
-    std::string patternFile_contents;
-    while (std::getline(patternFile, str))
-    {
-        patternFile_contents += str;
-        patternFile_contents.push_back('\n');
-    }
+    string patternFile_contents = getAllLines("pattern.txt");
+    cout << patternFile_contents << endl;
 
-    std::ifstream textFile("text.txt");
-    std::string textFile_contents;
-    while (std::getline(textFile, str))
-    {
-        textFile_contents += str;
-        textFile_contents.push_back('\n');
-    }  
+    string textFile_contents = getAllLines("text.txt");
+    cout << textFile_contents << endl; 
     
     /*
     if (strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size())) 
