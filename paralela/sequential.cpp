@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h> 
 
 using namespace std;
 
@@ -95,12 +96,10 @@ int main()
     vector<string> patternFile_contents = getAllLines("pattern.txt");
     vector<string> textFile_contents = getAllLines("text.txt");
 
-    /*
-    if (strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size()))
-        cout << "Yes" << endl;
-    else
-        cout << "No" << endl;
-    */
+    using namespace std::chrono;
+    // Get starting timepoint 
+    auto start = high_resolution_clock::now(); 
+
     int counter = 0;
     for(string line : textFile_contents){
         for(string pattern : patternFile_contents){
@@ -108,10 +107,18 @@ int main()
         }
     }
 
-    //counter = strmatch(textFile_contents, patternFile_contents, textFile_contents.size(), patternFile_contents.size());
-
     std::cout << "Number of matches: " << counter << endl;
 
+    // Get ending timepoint 
+    auto stop = high_resolution_clock::now(); 
+    // Get duration. Substart timepoints to  
+    // get durarion. To cast it to proper unit 
+    // use duration cast method 
+    auto duration = duration_cast<microseconds>(stop - start); 
+  
+    cout << "Time taken by function: "
+         << duration.count() << " microseconds" << endl;
+    
     closeFiles();
 
     return 0;
