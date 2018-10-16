@@ -102,7 +102,7 @@ int main()
     //sort(values.begin(), values.end()); 
   
     int th_id, nthreads;
-
+    
     vector<string> patternFile_contents = getAllLines("pattern.txt");
     vector<string> textFile_contents = getAllLines("text.txt");
 
@@ -110,7 +110,8 @@ int main()
     string line;
     int i = 0;
     int j = 0;
-    #pragma omp parallel for private(i) reduction(+:counter)
+    
+    #pragma omp parallel for private(i) reduction(+:counter) num_threads(2)
     for(i=0; i < textFile_contents.size(); i++){
         line = textFile_contents[i];
         for(j=0; j < patternFile_contents.size(); j++){
