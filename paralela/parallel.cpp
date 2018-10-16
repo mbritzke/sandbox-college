@@ -6,7 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <omp.h> 
+#include <omp.h>
+#include <time.h> 
 
 using namespace std;
 
@@ -93,29 +94,45 @@ void closeFiles()
 
 int main()
 {
+    using namespace std::chrono;
+    // Get starting timepoint 
+    auto start = high_resolution_clock::now(); 
+  
+    // Call the function, here sort() 
+    //sort(values.begin(), values.end()); 
+  
     int th_id, nthreads;
 
     vector<string> patternFile_contents = getAllLines("pattern.txt");
     vector<string> textFile_contents = getAllLines("text.txt");
 
     int counter = 0;
-    for(string line : textFile_contents){
-        
-        #pragma omp parallel private(th_id, nthreads) num_threads(4)
-        {
-            th_id = omp_get_thread_num();
-            nthreads = omp_get_num_threads();
-            for(string pattern : patternFile_contents){
-                counter += strmatch(line, pattern, line.length(), pattern.length());
-            }
-            printf("Hello World from thread %d of %d threads.\n", th_id, nthreads);
+    string line;
+    int i = 0;
+    int j = 0;
+    #pragma omp parallel for private(i) reduction(+:counter)
+    for(i=0; i < textFile_contents.size(); i++){
+        line = textFile_contents[i];
+        for(j=0; j < patternFile_contents.size(); j++){
+            string pattern = patternFile_contents[j];
+            counter += strmatch(line, pattern, line.length(), pattern.length());
         }
     }
-
+              
     std::cout << "Number of matches: " << counter << endl;
 
-    closeFiles();
+    // Get ending timepoint 
+    auto stop = high_resolution_clock::now(); 
+    // Get duration. Substart timepoints to  
+    // get durarion. To cast it to proper unit 
+    // use duration cast method 
+    auto duration = duration_cast<microseconds>(stop - start); 
+  
+    cout << "Time taken by function: "
+         << duration.count() << " microseconds" << endl;
 
+    closeFiles();
+    
     return 0;
 
 }
