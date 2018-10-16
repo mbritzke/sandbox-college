@@ -69,7 +69,6 @@ int strmatch(string str, string pattern, int n, int m)
     if(lookup[n][m])
         matchCounter++;
     return matchCounter;
-    //return lookup[n][m];
 }
 
 vector<string> getAllLines(string nameOfFile){
@@ -79,9 +78,7 @@ vector<string> getAllLines(string nameOfFile){
     while (getline(myFile, str))
     {
         linesOfFile.push_back(str);
-        //linesOfFile.push_back('\n');
     }
-
     myFile.close();
     return linesOfFile;
 }
@@ -97,10 +94,7 @@ int main()
     using namespace std::chrono;
     // Get starting timepoint 
     auto start = high_resolution_clock::now(); 
-  
-    // Call the function, here sort() 
-    //sort(values.begin(), values.end()); 
-  
+    
     int th_id, nthreads;
     
     vector<string> patternFile_contents = getAllLines("pattern.txt");
