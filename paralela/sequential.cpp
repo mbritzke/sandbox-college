@@ -68,7 +68,6 @@ int strmatch(string str, string pattern, int n, int m)
     if(lookup[n][m])
         matchCounter++;
     return matchCounter;
-    //return lookup[n][m];
 }
 
 vector<string> getAllLines(string nameOfFile){
