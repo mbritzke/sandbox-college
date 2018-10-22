@@ -13,6 +13,7 @@ using namespace std;
 
 ofstream patternFile;
 ofstream textFile;
+ofstream results;
 
 // Function that matches input str with given wildcard pattern
 int strmatch(string str, string pattern, int n, int m)
@@ -99,6 +100,7 @@ int main()
     
     vector<string> patternFile_contents = getAllLines("pattern.txt");
     vector<string> textFile_contents = getAllLines("text.txt");
+    results.open("results.txt");
 
     int counter = 0;
     string line;
@@ -115,6 +117,7 @@ int main()
     }
               
     std::cout << "Number of matches: " << counter << endl;
+    results << "Number of matches: " << counter << endl;
 
     // Get ending timepoint 
     auto stop = high_resolution_clock::now(); 
