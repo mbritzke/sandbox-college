@@ -58,17 +58,17 @@ int strmatch(string str, string pattern, int n, int m)
             // (a) current character of pattern is '?'
             // (b) characters actually match
             else if (pattern[j - 1] == '?' ||
-                    str[i - 1] == pattern[j - 1])
+                    str[i - 1] == pattern[j - 1]){
                 lookup[i][j] = lookup[i - 1][j - 1];
+	    }
 
             // If characters don't match
             else lookup[i][j] = false;
         }
-        if(str[i-1] == ' ' && lookup[i-2][j-2])
-            matchCounter++;
     }
     if(lookup[n][m])
         matchCounter++;
+
     return matchCounter;
 }
 
@@ -127,6 +127,8 @@ int main()
     auto duration = duration_cast<microseconds>(stop - start); 
   
     cout << "Time taken by function: "
+         << duration.count() << " microseconds" << endl;
+    results << "Time taken by function: "
          << duration.count() << " microseconds" << endl;
 
     closeFiles();
