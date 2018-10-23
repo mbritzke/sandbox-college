@@ -1,4 +1,8 @@
-//source: https://www.geeksforgeeks.org/wildcard-pattern-matching/
+/* 
+ * Os comentários em Inglês são originais do wildcard-pattern-matching
+ * Os comentários em Português são das nossas alterações.	
+ * source: https://www.geeksforgeeks.org/wildcard-pattern-matching/	
+*/
 
 // C++ program to implement wildcard
 // pattern matching algorithm
@@ -11,9 +15,10 @@
 
 using namespace std;
 
-ofstream patternFile;
-ofstream textFile;
-ofstream results;
+//Variáveis para obter os 3 arquivos
+ofstream patternFile; // Arquivo de padrões
+ofstream textFile;    // Arquivo de texto	
+ofstream results;     // Arquivo do resultado da execução do programa
 
 // Function that matches input str with given wildcard pattern
 int strmatch(string str, string pattern, int n, int m)
@@ -66,12 +71,14 @@ int strmatch(string str, string pattern, int n, int m)
             else lookup[i][j] = false;
         }
     }
+    //Incrementa o contador de padrões, caso a tabela na posição n e m seja true		
     if(lookup[n][m])
         matchCounter++;
 
     return matchCounter;
 }
 
+//Função responsável por extrair todas as linhas de um arquivo
 vector<string> getAllLines(string nameOfFile){
     string str;
     ifstream myFile(nameOfFile, std::ifstream::in);
@@ -84,16 +91,19 @@ vector<string> getAllLines(string nameOfFile){
     return linesOfFile;
 }
 
+//Função para fechar todos os arquivos
 void closeFiles()
 {
     patternFile.close();
     textFile.close();
+    results.close();
 }
 
 int main()
 {
     using namespace std::chrono;
-    // Get starting timepoint 
+    
+    //Inicia a contagem de tempo de execução
     auto start = high_resolution_clock::now(); 
     
     int th_id, nthreads;
@@ -102,11 +112,13 @@ int main()
     vector<string> textFile_contents = getAllLines("text.txt");
     results.open("results.txt");
 
+    //Variáveis para auxiliar a contagem de padrões encontrados
     int counter = 0;
     string line;
     int i = 0;
     int j = 0;
     
+    //Trecho responsável por realizar a contagem de padrões paralelamente
     #pragma omp parallel for private(i) reduction(+:counter) num_threads(2)
     for(i=0; i < textFile_contents.size(); i++){
         line = textFile_contents[i];
@@ -119,11 +131,9 @@ int main()
     std::cout << "Number of matches: " << counter << endl;
     results << "Number of matches: " << counter << endl;
 
-    // Get ending timepoint 
+    // Finaliza a contagem de tempo de execução 
     auto stop = high_resolution_clock::now(); 
-    // Get duration. Substart timepoints to  
-    // get durarion. To cast it to proper unit 
-    // use duration cast method 
+    // Obtém o tempo de excução em microsegundos
     auto duration = duration_cast<microseconds>(stop - start); 
   
     cout << "Time taken by function: "
