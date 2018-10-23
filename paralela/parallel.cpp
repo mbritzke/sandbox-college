@@ -1,7 +1,7 @@
-/* 
+/*
  * Os comentários em Inglês são originais do wildcard-pattern-matching
- * Os comentários em Português são das nossas alterações.	
- * source: https://www.geeksforgeeks.org/wildcard-pattern-matching/	
+ * Os comentários em Português são das nossas alterações.
+ * source: https://www.geeksforgeeks.org/wildcard-pattern-matching/
 */
 
 // C++ program to implement wildcard
@@ -11,13 +11,13 @@
 #include <fstream>
 #include <string>
 #include <omp.h>
-#include <time.h> 
+#include <time.h>
 
 using namespace std;
 
 //Variáveis para obter os 3 arquivos
 ofstream patternFile; // Arquivo de padrões
-ofstream textFile;    // Arquivo de texto	
+ofstream textFile;    // Arquivo de texto
 ofstream results;     // Arquivo do resultado da execução do programa
 
 // Function that matches input str with given wildcard pattern
@@ -71,7 +71,7 @@ int strmatch(string str, string pattern, int n, int m)
             else lookup[i][j] = false;
         }
     }
-    //Incrementa o contador de padrões, caso a tabela na posição n e m seja true		
+    //Incrementa o contador de padrões, caso a tabela na posição n e m seja true
     if(lookup[n][m])
         matchCounter++;
 
@@ -91,23 +91,15 @@ vector<string> getAllLines(string nameOfFile){
     return linesOfFile;
 }
 
-//Função para fechar todos os arquivos
-void closeFiles()
-{
-    patternFile.close();
-    textFile.close();
-    results.close();
-}
-
 int main()
 {
     using namespace std::chrono;
-    
+
     //Inicia a contagem de tempo de execução
-    auto start = high_resolution_clock::now(); 
-    
+    auto start = high_resolution_clock::now();
+
     int th_id, nthreads;
-    
+
     vector<string> patternFile_contents = getAllLines("pattern.txt");
     vector<string> textFile_contents = getAllLines("text.txt");
     results.open("results.txt");
@@ -117,32 +109,30 @@ int main()
     string line;
     int i = 0;
     int j = 0;
-    
+
     //Trecho responsável por realizar a contagem de padrões paralelamente
-    #pragma omp parallel for private(i) reduction(+:counter) num_threads(2)
-    for(i=0; i < textFile_contents.size(); i++){
-        line = textFile_contents[i];
+    #pragma omp parallel for private(i, line) reduction(+:counter) num_threads(4) collapse(2)
+    for(i=0; i < textFile_contents.size(); i++)
         for(j=0; j < patternFile_contents.size(); j++){
+            line = textFile_contents[i];
             string pattern = patternFile_contents[j];
             counter += strmatch(line, pattern, line.length(), pattern.length());
         }
-    }
-              
+
     std::cout << "Number of matches: " << counter << endl;
     results << "Number of matches: " << counter << endl;
 
-    // Finaliza a contagem de tempo de execução 
-    auto stop = high_resolution_clock::now(); 
+    // Finaliza a contagem de tempo de execução
+    auto stop = high_resolution_clock::now();
     // Obtém o tempo de excução em microsegundos
-    auto duration = duration_cast<microseconds>(stop - start); 
-  
+    auto duration = duration_cast<microseconds>(stop - start);
+
     cout << "Time taken by function: "
          << duration.count() << " microseconds" << endl;
     results << "Time taken by function: "
          << duration.count() << " microseconds" << endl;
 
-    closeFiles();
-    
-    return 0;
+    results.close();
 
+    return 0;
 }
