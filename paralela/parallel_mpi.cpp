@@ -108,18 +108,28 @@ int main(int argc, char **argv) {
     	results.open("results.txt");
 
 		chunksize = textFile_contents.size()/size;
+        int tamanhoVetorPadroes = patternFile_contents.size();
 
 		// Envia chunk para cada processo
 		for(int i=1; i<size; i++) {
 			int begin = i*chunksize;
-			MPI_Send(&textFile_contents[begin], chunksize, MPI_, i, 100, MPI_COMM_WORLD);
+            int tamanhoVetorTexto = 
+            for(string padrao : patternFile_contents)
+                MPI_Send((void *)padrao.c_str(), padrao.size(), MPI_CHAR, i, 100, MPI_COMM_WORLD);
+
+            for(int j = 0; j < begin + chunksize; j++){
+                string linha = textFile_contents[j];
+                MPI_Send((void *)linha.c_str(), linha.size(), MPI_CHAR, i, 200, MPI_COMM_WORLD);
+            }
 		}
 
 		// Mestre processa chunk local
 		// Verifica se valor eh primo
-		for(int i=0; i<chunksize; i++) {
-			resultado[i] = ehprimo(vetor[i]);
-		}
+        for(int j = 0; j < patternFile_contents.size(); j++){
+            for(int i=0; i<chunksize; i++) {
+			    soma += strmatch(textFile_contents[i], patternFile_contents[j], textFile_contents[i].length(), patternFile_contents[j].length());
+		    }
+        }
 
 		// Recebe respostas dos outros processos
 		for(int i=1; i<size; i++) {
@@ -130,9 +140,19 @@ int main(int argc, char **argv) {
             memcpy(&resultado[begin], auxbuf, chunksize*sizeof(int));
 		}
 	}else {
-		// Recebe chunk
-		MPI_Recv(vetor, chunksize, MPI_INT, 0,
-		MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        vector<string> linhas;
+        vector<string> padroes;
+		// Probe for message from 0, but does not receive it -> fills status to get count
+        MPI_Probe(0, 100, MPI_COMM_WORLD, &status);
+        // Get string size using status
+        int strsize;
+        MPI_Get_count(&status, MPI_CHAR, &strsize);
+        // Allocate buffer to receive an array of chars
+        char *buf = new char[strsize];
+        // Receive array of chars
+        MPI_Recv(buf, strsize, MPI_CHAR, 0, 100, MPI_COMM_WORLD, &status);
+        // Assign array of chars to string
+        s1 = buf;
 
 		// Processa chunk
 		for(int i=0; i<chunksize; i++) {
