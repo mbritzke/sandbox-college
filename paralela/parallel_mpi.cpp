@@ -10,10 +10,6 @@
 
 using namespace std;
 
-int soma;
-int soma_final;
-int chunksize;
-
 //Variáveis para obter os 3 arquivos
 ofstream patternFile; // Arquivo de padrões
 ofstream textFile;    // Arquivo de texto
@@ -96,6 +92,11 @@ int main(int argc, char **argv) {
 	int val;
 	MPI_Status status;
 
+    int soma;
+    int soma_final;
+    int chunksize;
+    int tamanhoVetorPadroes;
+
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -108,69 +109,96 @@ int main(int argc, char **argv) {
     	results.open("results.txt");
 
 		chunksize = textFile_contents.size()/size;
-        int tamanhoVetorPadroes = patternFile_contents.size();
+        tamanhoVetorPadroes = patternFile_contents.size();
 
 		// Envia chunk para cada processo
-		for(int i=1; i<size; i++) {
+		for(int i=1; i < size; i++) {
 			int begin = i*chunksize;
-            int tamanhoVetorTexto = 
+
+            MPI_Send(&tamanhoVetorPadroes, 1, MPI_INT, i, 100, MPI_COMM_WORLD);
+
             for(string padrao : patternFile_contents)
                 MPI_Send((void *)padrao.c_str(), padrao.size(), MPI_CHAR, i, 100, MPI_COMM_WORLD);
 
-            for(int j = 0; j < begin + chunksize; j++){
+            MPI_Send(&chunksize, 1, MPI_INT, i, 200, MPI_COMM_WORLD);
+
+            for(int j = begin; j < begin + chunksize; j++){
                 string linha = textFile_contents[j];
                 MPI_Send((void *)linha.c_str(), linha.size(), MPI_CHAR, i, 200, MPI_COMM_WORLD);
             }
 		}
 
-		// Mestre processa chunk local
-		// Verifica se valor eh primo
-        for(int j = 0; j < patternFile_contents.size(); j++){
-            for(int i=0; i<chunksize; i++) {
-			    soma += strmatch(textFile_contents[i], patternFile_contents[j], textFile_contents[i].length(), patternFile_contents[j].length());
+		soma_final = 0;
+        for(int i = 0; i < chunksize; i++){
+            for(int j=0; j < tamanhoVetorPadroes; j++) {
+			    soma_final += strmatch(textFile_contents[i], patternFile_contents[j], textFile_contents[i].length(), patternFile_contents[j].length());
 		    }
         }
 
+        //cout << "soma: " << soma_final << endl;
+
 		// Recebe respostas dos outros processos
 		for(int i=1; i<size; i++) {
-			MPI_Recv(auxbuf, chunksize, MPI_INT,
-			MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			MPI_Recv(&soma, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             int source = status.MPI_SOURCE;
-			int begin = source*chunksize;
-            memcpy(&resultado[begin], auxbuf, chunksize*sizeof(int));
+            soma_final += soma;
 		}
+
+        cout << "Resultado: " << soma_final << endl;
 	}else {
         vector<string> linhas;
         vector<string> padroes;
-		// Probe for message from 0, but does not receive it -> fills status to get count
-        MPI_Probe(0, 100, MPI_COMM_WORLD, &status);
-        // Get string size using status
-        int strsize;
-        MPI_Get_count(&status, MPI_CHAR, &strsize);
-        // Allocate buffer to receive an array of chars
-        char *buf = new char[strsize];
-        // Receive array of chars
-        MPI_Recv(buf, strsize, MPI_CHAR, 0, 100, MPI_COMM_WORLD, &status);
-        // Assign array of chars to string
-        s1 = buf;
 
-		// Processa chunk
-		for(int i=0; i<chunksize; i++) {
-			resultado[i] = ehprimo(vetor[i]);
-		}
+        MPI_Recv(&tamanhoVetorPadroes, 1, MPI_INT, 0, 100, MPI_COMM_WORLD, &status);
 
-		// Envia respostas
-		MPI_Send(resultado, chunksize, MPI_INT, 0,
-		100, MPI_COMM_WORLD);
+        //Recebe padroes
+        for(int i = 0; i < tamanhoVetorPadroes; i++){
+            // Probe for message from 0, but does not receive it -> fills status to get count
+            MPI_Probe(0, 100, MPI_COMM_WORLD, &status);
+            // Get string size using status
+            int strsize;
+            MPI_Get_count(&status, MPI_CHAR, &strsize);
+            // Allocate buffer to receive an array of chars
+            char *buf = new char[strsize];
+            // Receive array of chars
+            MPI_Recv(buf, strsize, MPI_CHAR, 0, 100, MPI_COMM_WORLD, &status);
+            // Assign array of chars to string
+            string linha = buf;
+            padroes.push_back(linha);
+        }
+		
+        MPI_Recv(&chunksize, 1, MPI_INT, 0, 200, MPI_COMM_WORLD, &status);
+        //cout << "chunk: " << chunksize << endl;
+
+        //Recebe linhas
+        for(int j = 0; j < chunksize; j++){
+            // Probe for message from 0, but does not receive it -> fills status to get count
+            MPI_Probe(0, 200, MPI_COMM_WORLD, &status);
+            // Get string size using status
+            int strsize;
+            MPI_Get_count(&status, MPI_CHAR, &strsize);
+            // Allocate buffer to receive an array of chars
+            char *buf = new char[strsize];
+            // Receive array of chars
+            MPI_Recv(buf, strsize, MPI_CHAR, 0, 200, MPI_COMM_WORLD, &status);
+            // Assign array of chars to string
+            string linha = buf;
+            linhas.push_back(linha);
+        }
+
+        //Processa linhas
+        soma = 0;
+		for(int i = 0; i < chunksize; i++){
+            for(int j=0; j < tamanhoVetorPadroes; j++) {
+			    soma += strmatch(linhas[i], padroes[j], linhas[i].length(), padroes[j].length());
+		    }
+        }
+
+        //cout << "soma: " << soma << endl;
+
+		// Envia resposta
+		MPI_Send(&soma, 1, MPI_INT, 0, 100, MPI_COMM_WORLD);
 	}
-
-	// if(rank == 0) {
-	// 	// Dump resultado
-	// 	for(int i=0; i<VETSIZE; i++) {
-	// 		printf("%d", resultado[i]);
-	// 	}
-	// 	printf("\n");
-	// }
 
 	MPI_Finalize();
 	return 0;
