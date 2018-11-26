@@ -157,3 +157,10 @@ Number of matches: 9330
 Time taken by function: 45670791 microseconds
 Number of matches: 9330
 Time taken by function: 49161903 microseconds
+pp12815@marfim:~/exemplos$ ./sequential 
+Number of matches: 9330
+Time taken by function: 11528991 microseconds
+pp12815@marfim:~/exemplos$ ./sequential 
+Number of matches: 9330
+Time taken by function: 11529204 microseconds
+
