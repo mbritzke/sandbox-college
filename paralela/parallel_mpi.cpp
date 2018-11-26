@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <limits>
 
 using namespace std;
 
@@ -73,14 +74,30 @@ int strmatch(string str, string pattern, int n, int m)
     return matchCounter;
 }
 
+std::fstream& GotoLine(std::fstream& file, unsigned int num){
+    file.seekg(std::ios::beg);
+    for(int i=0; i < num; ++i){
+        file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+    return file;
+}
+
 //Função responsável por extrair todas as linhas de um arquivo
-vector<string> getAllLines(string nameOfFile){
+vector<string> getAllLines(string nameOfFile, int from, int to){
     string str;
-    ifstream myFile(nameOfFile, std::ifstream::in);
+    fstream myFile(nameOfFile);
     vector<string> linesOfFile;
-    while (getline(myFile, str))
-    {
-        linesOfFile.push_back(str);
+    if(to == 0){
+       while (getline(myFile, str))
+       {
+	   linesOfFile.push_back(str);
+       }
+    } else{
+       GotoLine(myFile, from);
+       for(int i = from; i < to; i++){
+          getline(myFile, str);
+          linesOfFile.push_back(str);
+       }
     }
     myFile.close();
     return linesOfFile;
@@ -96,6 +113,7 @@ int main(int argc, char **argv) {
     int soma_final;
     int chunksize;
     int tamanhoVetorPadroes;
+    int inicio, fim;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -103,99 +121,54 @@ int main(int argc, char **argv) {
 
 	// MASTER
 	if(rank == 0) {
+    double t1,t2;
+    t1 = MPI_Wtime();  // inicia a contagem do tempo
 		// Preencher vetor
-		vector<string> patternFile_contents = getAllLines("pattern.txt");
-    	vector<string> textFile_contents = getAllLines("text.txt");
-    	results.open("results.txt");
+	  vector<string> patternFile_contents = getAllLines("pattern.txt", 0, 0);
+    vector<string> textFile_contents = getAllLines("text.txt",0, 0);
+  	results.open("results.txt");
 
 		chunksize = textFile_contents.size()/size;
-        tamanhoVetorPadroes = patternFile_contents.size();
+    tamanhoVetorPadroes = patternFile_contents.size();
 
 		// Envia chunk para cada processo
 		for(int i=1; i < size; i++) {
 			int begin = i*chunksize;
-
-            MPI_Send(&tamanhoVetorPadroes, 1, MPI_INT, i, 100, MPI_COMM_WORLD);
-
-            for(string padrao : patternFile_contents)
-                MPI_Send((void *)padrao.c_str(), padrao.size(), MPI_CHAR, i, 100, MPI_COMM_WORLD);
-
-            MPI_Send(&chunksize, 1, MPI_INT, i, 200, MPI_COMM_WORLD);
-
-            for(int j = begin; j < begin + chunksize; j++){
-                string linha = textFile_contents[j];
-                MPI_Send((void *)linha.c_str(), linha.size(), MPI_CHAR, i, 200, MPI_COMM_WORLD);
-            }
+      MPI_Send(&begin, 1, MPI_INT, i, 100, MPI_COMM_WORLD);
+      int to = begin + chunksize;
+      MPI_Send(&to, 1, MPI_INT, i, 200, MPI_COMM_WORLD);
 		}
 
-		soma_final = 0;
-        for(int i = 0; i < chunksize; i++){
-            for(int j=0; j < tamanhoVetorPadroes; j++) {
-			    soma_final += strmatch(textFile_contents[i], patternFile_contents[j], textFile_contents[i].length(), patternFile_contents[j].length());
-		    }
+    soma_final = 0;
+    for(int i = 0; i < chunksize; i++){
+        for(int j=0; j < tamanhoVetorPadroes; j++) {
+          soma_final += strmatch(textFile_contents[i], patternFile_contents[j], textFile_contents[i].length(), patternFile_contents[j].length());
         }
-
-        //cout << "soma: " << soma_final << endl;
+    }
 
 		// Recebe respostas dos outros processos
 		for(int i=1; i<size; i++) {
 			MPI_Recv(&soma, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            int source = status.MPI_SOURCE;
-            soma_final += soma;
+      int source = status.MPI_SOURCE;
+      soma_final += soma;
 		}
-
-        cout << "Resultado: " << soma_final << endl;
+    t2 = MPI_Wtime();
+    cout << "Resultado: " << soma_final << endl;
+    cout << "Tempo: " << t2-t1 << endl;
 	}else {
-        vector<string> linhas;
-        vector<string> padroes;
+    vector<string> padroes = getAllLines("pattern.txt", 0, 0);
 
-        MPI_Recv(&tamanhoVetorPadroes, 1, MPI_INT, 0, 100, MPI_COMM_WORLD, &status);
-
-        //Recebe padroes
-        for(int i = 0; i < tamanhoVetorPadroes; i++){
-            // Probe for message from 0, but does not receive it -> fills status to get count
-            MPI_Probe(0, 100, MPI_COMM_WORLD, &status);
-            // Get string size using status
-            int strsize;
-            MPI_Get_count(&status, MPI_CHAR, &strsize);
-            // Allocate buffer to receive an array of chars
-            char *buf = new char[strsize];
-            // Receive array of chars
-            MPI_Recv(buf, strsize, MPI_CHAR, 0, 100, MPI_COMM_WORLD, &status);
-            // Assign array of chars to string
-            string linha = buf;
-            padroes.push_back(linha);
-        }
-		
-        MPI_Recv(&chunksize, 1, MPI_INT, 0, 200, MPI_COMM_WORLD, &status);
-        //cout << "chunk: " << chunksize << endl;
-
-        //Recebe linhas
-        for(int j = 0; j < chunksize; j++){
-            // Probe for message from 0, but does not receive it -> fills status to get count
-            MPI_Probe(0, 200, MPI_COMM_WORLD, &status);
-            // Get string size using status
-            int strsize;
-            MPI_Get_count(&status, MPI_CHAR, &strsize);
-            // Allocate buffer to receive an array of chars
-            char *buf = new char[strsize];
-            // Receive array of chars
-            MPI_Recv(buf, strsize, MPI_CHAR, 0, 200, MPI_COMM_WORLD, &status);
-            // Assign array of chars to string
-            string linha = buf;
-            linhas.push_back(linha);
-        }
-
-        //Processa linhas
-        soma = 0;
-		for(int i = 0; i < chunksize; i++){
-            for(int j=0; j < tamanhoVetorPadroes; j++) {
-			    soma += strmatch(linhas[i], padroes[j], linhas[i].length(), padroes[j].length());
-		    }
-        }
-
-        //cout << "soma: " << soma << endl;
-
+    MPI_Recv(&inicio, 1, MPI_INT, 0, 100, MPI_COMM_WORLD, &status);
+    MPI_Recv(&fim, 1, MPI_INT, 0, 200, MPI_COMM_WORLD, &status);
+    //cout << "Inicio: " << inicio << "  fim: " << fim << endl;
+    vector<string> linhas = getAllLines("text.txt", inicio, fim);
+    //cout << "tamanho: " << linhas.size() << endl;
+    soma = 0;
+    for(string linha : linhas){
+      for(string padrao : padroes){
+        soma += strmatch(linha, padrao, linha.length(), padrao.length());
+      }
+    }
 		// Envia resposta
 		MPI_Send(&soma, 1, MPI_INT, 0, 100, MPI_COMM_WORLD);
 	}
@@ -203,3 +176,4 @@ int main(int argc, char **argv) {
 	MPI_Finalize();
 	return 0;
 }
+
