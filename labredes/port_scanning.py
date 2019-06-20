@@ -38,7 +38,6 @@ class TCPPacket:
         self.tcp_wdw = socket.htons (5840)  # Window Size
         self.tcp_chksum = 0                 # CheckSum
         self.tcp_urg_ptr = 0                # Urgent Pointer
-        
         return
 
     def assemble_tcp_feilds(self):
@@ -56,3 +55,26 @@ class TCPPacket:
 
         self.calculate_chksum()
         return
+
+    def calculate_chksum(self):
+        src_addr     = socket.inet_aton( self.src_ip )
+        dest_addr    = socket.inet_aton( self.dst_ip )
+        placeholder  = 0
+        protocol     = socket.IPPROTO_TCP
+        tcp_len      = len(self.raw) + len(self.data)
+
+        psh = struct.pack('!4s4sBBH' , 
+         src_addr ,    # Source Address  
+         dest_addr ,   # Destination Address 
+         placeholder , # Placeholder
+         protocol ,    # Protocol 
+         tcp_len       # Length of pseudo + Demo TCP header + Data 
+         )
+
+        psh = psh + self.raw + self.data
+        self.tcp_chksum = self.chksum(psh)
+        self.reassemble_tcp_feilds()       
+
+        return
+
+    
