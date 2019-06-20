@@ -77,4 +77,14 @@ class TCPPacket:
 
         return
 
-    
+    def chksum(self, msg):
+        s = 0  
+        # loop taking 2 characters at a time
+        for i in range(0, len(msg), 2):
+            a = ord(msg[i]) 
+            b = ord(msg[i+1])
+            s = s + (a+(b << 8))
+        
+        s = s + (s >> 16)
+        s = ~s & 0xffff
+        return s
