@@ -1,4 +1,4 @@
-# Objetivo de descobrir portas abertas no sistema utilizando usando IPv6
+# Objetivo: descobrir portas abertas no sistema utilizando usando IPv6
 
 import socket
 import struct
@@ -39,4 +39,20 @@ class TCPPacket:
         self.tcp_chksum = 0                 # CheckSum
         self.tcp_urg_ptr = 0                # Urgent Pointer
         
+        return
+
+    def assemble_tcp_feilds(self):
+        self.raw = struct.pack('!HHLLBBHHH',    # Data Structure Representation
+        self.tcp_src,                           # Source IP
+        self.tcp_dst,                           # Destination IP
+        self.tcp_seq,                           # Sequence
+        self.tcp_ack_seq,                       # Acknownlegment Sequence
+        self.tcp_hdr_len,                       # Header Length
+        self.tcp_flags ,                        # TCP Flags
+        self.tcp_wdw,                           # TCP Windows
+        self.tcp_chksum,                        # TCP cheksum
+        self.tcp_urg_ptr                        # TCP Urgent Pointer
+        )
+
+        self.calculate_chksum()
         return
