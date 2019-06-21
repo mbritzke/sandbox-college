@@ -88,3 +88,17 @@ class TCPPacket:
         s = s + (s >> 16)
         s = ~s & 0xffff
         return s
+
+    def reassemble_tcp_feilds(self):
+        self.raw = struct.pack('!HHLLBBHH!H', 
+         self.tcp_src, 
+         self.tcp_dst, 
+         self.tcp_seq, 
+         self.tcp_ack_seq, 
+         self.tcp_hdr_len, 
+         self.tcp_flags, 
+         self.tcp_wdw,
+         self.tcp_chksum,
+         self.tcp_urg_ptr
+        )
+        return
